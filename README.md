@@ -1,0 +1,1 @@
+The React.js client-side repository can be found [here](https://github.com/elel123/Idiot-Card-Game-Client).
