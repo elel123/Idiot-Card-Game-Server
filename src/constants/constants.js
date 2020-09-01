@@ -6,7 +6,7 @@ exports.DECK_NUM = [1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13,
 
 exports.ACTIVE_TIME_GAP = 600000;
 exports.WIN_TIME_GAP = 10000;
-exports.TOTAL_NUM_GAME = 5;
+exports.TOTAL_NUM_GAME = 10;
 
 const POWER_CARDS = [2, 3, 7, 10, 15, 16, 20, 23, 28, 29, 33, 36, 41, 42, 46, 49];
 exports.PLAYABLE = {
