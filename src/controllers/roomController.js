@@ -161,7 +161,6 @@ const removePlayerHandler = async function(req) {
     const playerList = await Game.getPlayerList(game.room_id);
     let foundPlayer = false;
     let playerID;
-    console.log(playerList);
     for (let player of playerList) {        
         if (player.username == req.body.player_to_be_deleted) {
             if (player._id.toString() == req.body.user_id) {
@@ -309,7 +308,6 @@ const startHandler = async function(req) {
             return resBody;
         }
         //Add the cards to each players hand
-        console.log(drawnCards);
         try {
             await User.updateOne(
                 {_id : player._id},

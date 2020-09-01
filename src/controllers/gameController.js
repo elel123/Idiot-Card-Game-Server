@@ -275,7 +275,6 @@ const playCardHandler = async function(req) {
             {room_id : req.params.gameID},
             {$set : {played_pile : game.played_pile, discard : game.discard, turn_at : game.turn_at, time_updated : Date.now()}}
         );
-        console.log(result);
         await User.updateOne(
             {_id : req.body.user_id},
             {$set : {hand : player.hand, untouched_hand : player.untouched_hand}}
