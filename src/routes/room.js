@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const roomController = require('../controllers/roomController');
-const Game = require('../models/Game');
+const Game = require('../models/game.js');
 
 /**
  * Request Body: username 

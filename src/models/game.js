@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const User = require('./User');
+const User = require('./user.js');
 const { DECK_NUM, PLAYABLE } = require('../constants/constants.js');
 const randomInt = require('../utils/getRandomInt');
 

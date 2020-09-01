@@ -1,5 +1,5 @@
-const Game = require('../models/Game');
-const User = require('../models/User');
+const Game = require('../models/game.js');
+const User = require('../models/user.js');
 const { ACTIVE_TIME_GAP, TOTAL_NUM_GAME, WIN_TIME_GAP } = require('../constants/constants.js');
 const createRoomID = require('../utils/createRoomID');
 const { drawCardHandler } = require('./gameController');

@@ -1,5 +1,5 @@
-const Game = require('../models/Game');
-const User = require('../models/User');
+const Game = require('../models/game.js');
+const User = require('../models/user.js');
 const { DECK_NUM, PLAYABLE } = require('../constants/constants.js');
 
 const swapHandler = async function(req) {
