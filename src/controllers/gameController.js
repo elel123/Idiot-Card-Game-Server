@@ -371,7 +371,7 @@ const playHiddenCardHandler = async function(req) {
         );
         await User.updateOne(
             {_id : req.body.user_id},
-            {$set : {hidden_hand : player.hidden_hand}}
+            {$set : {hidden_hand : player.hidden_hand, failed_hidden_play : true}}
         );
         resBody.success = true;
         return resBody;
@@ -500,11 +500,20 @@ const takeFromCenterHandler = async function(req) {
     playerIndex = (playerIndex + 1) == game.players.length ? 0 : (playerIndex + 1);
     game.turn_at = game.players[playerIndex];    
 
+    //Check if the player is fixing their failed hidden play
+    if (player.failed_hidden_play) {
+        player.failed_hidden_play = false;
+    }
+
     //Update the database with the changes
     try {
         await User.updateOne(
             {_id : req.body.user_id},
-            {$set : {hand : player.hand, untouched_hand : player.untouched_hand}}
+            {$set : {
+                hand : player.hand, 
+                failed_hidden_play : player.failed_hidden_play,
+                untouched_hand : player.untouched_hand
+            }}
         );
         await Game.updateOne(
             {room_id : req.params.gameID},
@@ -689,19 +698,15 @@ const getGameStateHandler = async function(req) {
     //Check for if a player has won already
     if (game.deck.length == 0) {
 
-        //First checks if the top card is a valid play (the hiddenCard handler plays the card regardless)
-        if (game.played_pile.length <= 1 || 
-            PLAYABLE[game.played_pile[game.played_pile.length - 2]].indexOf(game.played_pile[game.played_pile.length - 1]) != -1) {
-
-            for (let plyr of playerList) {
-                let newUntouched = plyr.untouched_hand.map((val) => {return (val == -1 ? true : false)});
-                let newHidden = plyr.hidden_hand.map((val) => {return (val == -1 ? true : false)})
-                if (plyr.hand.length == 0 && newUntouched.indexOf(false) == -1 && newHidden.indexOf(false) == -1) {
-                    resBody.is_won = true;
-                    resBody.winner = plyr.username;
-                }
+        for (let plyr of playerList) {
+            let newUntouched = plyr.untouched_hand.map((val) => {return (val == -1 ? true : false)});
+            let newHidden = plyr.hidden_hand.map((val) => {return (val == -1 ? true : false)})
+            if (plyr.hand.length == 0 && !plyr.failed_hidden_play && newUntouched.indexOf(false) == -1 && newHidden.indexOf(false) == -1) {
+                resBody.is_won = true;
+                resBody.winner = plyr.username;
             }
         }
+        
     }
 
     if (resBody.is_won) {

@@ -22,6 +22,11 @@ const UserSchema = mongoose.Schema({
         type: Boolean,
         required: false,
         default: false
+    },
+    failed_hidden_play: {
+        type: Boolean,
+        required: false,
+        default: false
     }   
 }); 
 
