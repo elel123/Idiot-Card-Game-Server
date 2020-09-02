@@ -54,6 +54,10 @@ mongoose.connect(DATABASE_URL, { useNewUrlParser: true, useUnifiedTopology: true
             socket.to(game_id).emit('player-leave', {username: username});
         });
 
+        socket.on('leave-game', ({username, game_id}) => {
+            socket.to(game_id).emit('player-left-game', {username: username});
+        });
+
         socket.on('remove', ({removed_player, game_id}) => {
             socket.to(game_id).emit('removed-player', {removed_player : removed_player});
         });
