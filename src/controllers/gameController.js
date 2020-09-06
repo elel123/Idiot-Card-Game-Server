@@ -360,6 +360,12 @@ const playMultipleCardsHandler = async function(req) {
         player.hand.splice(cardIndex, 1);
     }
 
+    //Check if the selected cards are playable
+    if (!(await Game.playable(req.params.gameID, req.body.selected_cards[0], game))) {
+        resBody.err_msg = "The selected cards cannot be played to the center.";
+        return resBody;
+    } 
+
     //Add the cards to the played_pile
     game.played_pile = [...game.played_pile, ...req.body.selected_cards];
 
