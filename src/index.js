@@ -78,6 +78,10 @@ mongoose.connect(DATABASE_URL, { useNewUrlParser: true, useUnifiedTopology: true
             socket.to(game_id).emit('player-played', {card : card, username : username, playable : playable, is_burn : is_burn});
         });
 
+        socket.on('play-multiple', ({game_id, cards, username, is_burn}) => {
+            socket.to(game_id).emit('player-played-mult', {cards : cards, username : username, is_burn : is_burn});
+        });
+
         socket.on('take-center', ({game_id, username}) => {
             socket.to(game_id).emit('player-took-center', {username : username});
         });

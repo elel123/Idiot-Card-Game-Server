@@ -24,6 +24,13 @@ router.put('/:gameID/playCard', async (req, res) => {
 });
 
 /**
+ * Request Body: user_id, selected_cards ([Number])
+ */
+router.put('/:gameID/playMultipleCards', async (req, res) => {
+    res.send(await gameController.playMultipleCardsHandler(req));
+});
+
+/**
  * Request Body: user_id, card_position (0, 1, or 2) 
  */
 router.put('/:gameID/playHidden', async (req, res) => {

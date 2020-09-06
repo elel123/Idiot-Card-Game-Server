@@ -288,6 +288,122 @@ const playCardHandler = async function(req) {
     return resBody;
 }
 
+const playMultipleCardsHandler = async function(req) {
+    const resBody = {
+        success : false,
+        err_msg : "",
+        is_burn: false,
+        go_again: false
+    }
+
+    //Attempt to find the game
+    const game = await Game.findOne({room_id : req.params.gameID});
+    if (game == null) {
+        resBody.err_msg = "Room does not exist!"
+        return resBody;
+    }
+
+    //Check if the user exists in the game room
+    if (game.players.indexOf(req.body.user_id) == -1) {
+        resBody.err_msg = "You are not in this game room!";
+        return resBody;
+    }
+
+    //Check if the game has started
+    if (!game.started) {
+        resBody.err_msg = "The game has not started yet!";
+        return resBody;
+    }
+
+    //Check if it's still the swapping phase
+    if (game.in_swap_phase) {
+        resBody.err_msg = "The game is still in the swapping phase. Wait until everyone has locked in."
+        return resBody;
+    }
+
+    //Check if it's the player's turn
+    if (game.turn_at.toString() != req.body.user_id) {
+        resBody.err_msg = "It is not your turn to play!";
+        return resBody;
+    }        
+
+    //Check if the selected cards has been passed in
+    if (req.body.selected_cards === undefined) {
+        resBody.err_msg = "Error: no cards selected";
+        return resBody;
+    }
+    
+    //Check if the selected card exists in the user's hand
+    const player = await User.findOne({_id : req.body.user_id});
+    if (player == null) {
+        resBody.err_msg = "Error: User not found in database.";
+        return resBody;
+    }
+    if (req.body.selected_cards.length == 0) {
+        resBody.success = true;
+        return resBody;
+    }
+    let firstCard = req.body.selected_cards[0] % 13;
+    for (let card of req.body.selected_cards) {
+        if (card % 13 !== firstCard) {
+            resBody.err_msg = "The selected cards aren't duplicates (not same number)";
+            return resBody;
+        }
+
+        let cardIndex = player.hand.indexOf(card);
+        if (cardIndex === -1) {
+            resBody.err_msg = "There is a card that do not exist in your hand";
+            return resBody;
+        }
+
+        //Remove the cards from the player's hand
+        player.hand.splice(cardIndex, 1);
+    }
+
+    //Add the cards to the played_pile
+    game.played_pile = [...game.played_pile, ...req.body.selected_cards];
+
+    //Check for if there is a burn
+    if (Game.isBurn(game.played_pile)) {
+
+        resBody.is_burn = true;
+        resBody.go_again = true;
+        //Move the played pile into the discard pile.
+        game.discard = [...game.discard, ...game.played_pile];
+        game.played_pile = [];
+    }
+
+    //Check if a 2 has been played
+    if (req.body.selected_cards[0] % 13 == 2) {
+        resBody.go_again = true;
+    }
+
+    //Move the turn_at to the next player 
+    if (!resBody.go_again) {
+        let playerIndex = game.players.indexOf(req.body.user_id);
+        playerIndex = (playerIndex + 1) == game.players.length ? 0 : (playerIndex + 1);
+        game.turn_at = game.players[playerIndex];
+    }
+
+    //Update the changes to the database
+    try {
+        await Game.updateOne(
+            {room_id : req.params.gameID},
+            {$set : {played_pile : game.played_pile, discard : game.discard, turn_at : game.turn_at, time_updated : Date.now()}}
+        );
+        await User.updateOne(
+            {_id : req.body.user_id},
+            {$set : {hand : player.hand}}
+        );
+    } catch (error) {
+        resBody.err_msg = "Error with database when saving the card play.";
+        return resBody;
+    }
+
+    resBody.success = true;
+    return resBody;
+}
+
 const playHiddenCardHandler = async function(req) {
     const resBody = {
         success : false,
@@ -762,6 +878,7 @@ module.exports = {
     swapHandler, 
     lockInHandler, 
     playCardHandler, 
+    playMultipleCardsHandler,
     playHiddenCardHandler, 
     takeFromCenterHandler,
     drawCardHandler,
