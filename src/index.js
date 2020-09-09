@@ -66,6 +66,10 @@ mongoose.connect(DATABASE_URL, { useNewUrlParser: true, useUnifiedTopology: true
             socket.to(game_id).emit('game-start');
         });
 
+        socket.on('edit-settings', ({game_id, settings}) => {
+            socket.to(game_id).emit('settings-changed', {settings : settings});
+        });
+
         socket.on('swap', ({game_id, username}) => {
             socket.to(game_id).emit('player-swap', {username : username});
         });
