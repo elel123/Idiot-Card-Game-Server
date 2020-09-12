@@ -105,7 +105,12 @@ const createHandler = async function(req) {
         resBody.err_msg = `Total number of games exceeded: ${TOTAL_NUM_GAME}`;
         return resBody;
     }
-    resBody.room_id = createRoomID(roomIDList);
+
+    if (req.body.username === 'cardi' && roomIDList.indexOf('wapwap') === -1) {
+        resBody.room_id = 'wapwap';
+    } else {
+        resBody.room_id = createRoomID(roomIDList);
+    }
 
     //Create the user
     const user = new User({

@@ -165,7 +165,7 @@ GameSchema.statics.isBurn = function(play_pile) {
         return false;
     }
 
-    let newPlayPile = [play_pile[0]];
+    let newPlayPile = [play_pile[0] % 13];
     let i;
     for (i = 1; i < play_pile.length; i++) {
         if (play_pile[i] % 13 == 3) {
