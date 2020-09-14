@@ -99,6 +99,7 @@ mongoose.connect(DATABASE_URL, { useNewUrlParser: true, useUnifiedTopology: true
         });
 
         socket.on('new-room', ({game_id, new_game_id}) => {
+            console.log("new room: " + new_game_id);
             socket.to(game_id).emit('created-new-room', {new_game_id : new_game_id});
         });
 
