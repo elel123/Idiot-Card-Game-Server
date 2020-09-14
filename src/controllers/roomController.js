@@ -329,13 +329,13 @@ const startHandler = async function(req) {
     }
 
     //Draw a card for the center to begin
-    let startCard = await Game.drawCard(req.params.gameID, 1, game);
+    //let startCard = await Game.drawCard(req.params.gameID, 1, game);
 
     //Attempt to update the game state 
     try {
         await Game.updateOne(
             {room_id : req.params.gameID},
-            {$set : {started : true, played_pile : startCard, time_updated : Date.now()}}
+            {$set : {started : true, time_updated : Date.now()}}
         );
     } catch(error) {
         resBody.err_msg = "Error with starting the game in the database";

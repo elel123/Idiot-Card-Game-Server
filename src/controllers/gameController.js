@@ -368,7 +368,7 @@ const playMultipleCardsHandler = async function(req) {
 
             if (handCardIndex !== -1) {
                 //Remove the cards from the player's hand
-                player.hand.splice(cardIndex, 1);
+                player.hand.splice(handCardIndex, 1);
             }
 
             if (untouchedCardIndex !== -1) {
