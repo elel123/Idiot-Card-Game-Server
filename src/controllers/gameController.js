@@ -343,21 +343,59 @@ const playMultipleCardsHandler = async function(req) {
         resBody.success = true;
         return resBody;
     }
-    let firstCard = req.body.selected_cards[0] % 13;
-    for (let card of req.body.selected_cards) {
-        if (card % 13 !== firstCard) {
-            resBody.err_msg = "The selected cards aren't duplicates (not same number)";
+    
+    //See if untouched cards were selected
+    if (req.body.selected_cards.length > player.hand.length) {
+        if (game.deck.length !== 0) {
+            resBody.err_msg = "You cannot play your untouched cards until the deck runs out.";
             return resBody;
         }
+        let firstCard = req.body.selected_cards[0] % 13;
+        for (let card of req.body.selected_cards) {
+            //Check if all the selected cards are the same
+            if (card % 13 !== firstCard) {
+                resBody.err_msg = "The selected cards aren't duplicates (not same number)";
+                return resBody;
+            }
 
-        let cardIndex = player.hand.indexOf(card);
-        if (cardIndex === -1) {
-            resBody.err_msg = "There is a card that do not exist in your hand";
-            return resBody;
+            let handCardIndex = player.hand.indexOf(card);
+            let untouchedCardIndex = player.untouched_hand.indexOf(card);
+
+            if (handCardIndex === -1 && untouchedCardIndex === -1) {
+                resBody.err_msg = "There is a card that does not exist in your hand.";
+                return resBody;
+            }
+
+            if (handCardIndex !== -1) {
+                //Remove the cards from the player's hand
+                player.hand.splice(cardIndex, 1);
+            }
+
+            if (untouchedCardIndex !== -1) {
+                //Remove the cards from the untouched hand
+                player.untouched_hand[untouchedCardIndex] = -1;
+            }
         }
 
-        //Remove the cards from the player's hand
-        player.hand.splice(cardIndex, 1);
+
+    } else {
+        let firstCard = req.body.selected_cards[0] % 13;
+        for (let card of req.body.selected_cards) {
+            //Check if all the selected cards are the same
+            if (card % 13 !== firstCard) {
+                resBody.err_msg = "The selected cards aren't duplicates (not same number)";
+                return resBody;
+            }
+    
+            let cardIndex = player.hand.indexOf(card);
+            if (cardIndex === -1) {
+                resBody.err_msg = "There is a card that does not exist in your hand.";
+                return resBody;
+            }
+    
+            //Remove the cards from the player's hand
+            player.hand.splice(cardIndex, 1);
+        }
     }
 
     //Check if the selected cards are playable
@@ -399,7 +437,7 @@ const playMultipleCardsHandler = async function(req) {
         );
         await User.updateOne(
             {_id : req.body.user_id},
-            {$set : {hand : player.hand}}
+            {$set : {hand : player.hand, untouched_hand : player.untouched_hand}}
         );
     } catch (error) {
         resBody.err_msg = "Error with database when saving the card play.";
