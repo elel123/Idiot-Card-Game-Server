@@ -98,6 +98,14 @@ mongoose.connect(DATABASE_URL, { useNewUrlParser: true, useUnifiedTopology: true
             socket.to(game_id).emit('sent-message', {username : username, message : message});
         });
 
+        socket.on('new-room', ({game_id, new_game_id}) => {
+            socket.to(game_id).emit('created-new-room', {new_game_id : new_game_id});
+        });
+
+        socket.on('disconnect-from-room', ({game_id}) => {
+            socket.leave(game_id);
+        });
+
         socket.on('data-lost', ({game_id}) => {
             socket.to(game_id).emit('game-data-lost');
         });
