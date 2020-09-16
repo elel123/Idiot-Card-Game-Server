@@ -27,6 +27,7 @@ const joinHandler = async function(req) {
  
     //Check if the username is already used
     const playerList = await Game.getPlayerList(game.room_id);
+    let playerIDs = [];
     let username = req.body.username;
     if (username == undefined) {
         username = "unnamed player";
@@ -37,6 +38,7 @@ const joinHandler = async function(req) {
             return resBody;
         }
         resBody.players_in_room.push(player.username);
+        playerIDs.push(player._id.toString());
     }
 
     //Create the user
@@ -55,7 +57,7 @@ const joinHandler = async function(req) {
     try {
         await Game.updateOne(
             {room_id : req.params.gameID},
-            {$set : {players : [...game.players, resBody.user_id], time_updated : Date.now()}}
+            {$set : {players : [...playerIDs, resBody.user_id], time_updated : Date.now()}}
         );
     } catch (error) {
         await User.deleteOne({_id : resBody.user_id});
