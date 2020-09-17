@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/user.js');
 const {PLAYABLE} = require('../constants/constants');
-const { KEY } = require("./constants/envConstants.js");
+const { KEY } = require("../constants/envConstants.js");
 
 router.get('/:key/user', async (req, res) => {
     if (req.params.key !== KEY) {
