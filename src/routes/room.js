@@ -45,4 +45,8 @@ router.get('/:gameID/:user_id/checkInRoom', async (req, res) => {
     res.send(await roomController.checkInRoomHandler(req));
 });
 
+router.get('/:gameID/playersInRoom', async (req, res) => {
+    res.send(await roomController.playersInRoomHandler(req));
+});
+
 module.exports = router;

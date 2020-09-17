@@ -374,4 +374,34 @@ const checkInRoomHandler = async function(req) {
     return resBody;
 } 
 
-module.exports = { joinHandler, createHandler, removePlayerHandler, leaveRoomHandler, startHandler, checkInRoomHandler };
+const playersInRoomHandler = async function(req) {
+    const resBody = {
+        success : false,
+        err_msg : "",
+        player_names : []
+    }
+
+    const playerList = await Game.getPlayerList(req.params.gameID);
+
+    if (playerList.length == 0) {
+        resBody.err_msg = "Error: Game not found";
+        return resBody;
+    }
+
+    for (let player of playerList) {
+        resBody.player_names.push(player.username);
+    }
+
+    resBody.success = true;
+    return resBody;
+}
+
+module.exports = { 
+    joinHandler, 
+    createHandler, 
+    removePlayerHandler, 
+    leaveRoomHandler, 
+    startHandler, 
+    checkInRoomHandler,
+    playersInRoomHandler 
+};
