@@ -6,9 +6,9 @@ const { KEY } = require("../constants/envConstants.js");
 
 router.get('/:key/user', async (req, res) => {
     if (req.params.key !== KEY) {
-        return {
+        res.send({
             message: "access denied"
-        };
+        });
     }
     try {
         const users = await User.find();
@@ -29,9 +29,9 @@ router.get('/user/:id', async (req, res) => {
 
 router.post('/:key/user', async (req, res) => {
     if (req.params.key !== KEY) {
-        return {
+        res.send({
             message: "access denied"
-        };
+        });
     }
 
     const user = new User({
