@@ -26,7 +26,7 @@ const joinHandler = async function(req) {
     }
  
     //Check if the username is already used
-    const playerList = await Game.getPlayerList(game.room_id);
+    const playerList = await Game.getPlayerList(game.room_id, game);
     let playerIDs = [];
     let username = req.body.username;
     if (username == undefined) {

@@ -39,12 +39,15 @@ router.put('/:gameID/start', async (req, res) => {
 });
 
 /**
- * Request Body: user_id
+ * Request Body: None
  */
 router.get('/:gameID/:user_id/checkInRoom', async (req, res) => {
     res.send(await roomController.checkInRoomHandler(req));
 });
 
+/**
+ * Request Body: None
+ */
 router.get('/:gameID/playersInRoom', async (req, res) => {
     res.send(await roomController.playersInRoomHandler(req));
 });
