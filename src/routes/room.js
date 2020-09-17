@@ -38,13 +38,11 @@ router.put('/:gameID/start', async (req, res) => {
     res.send(await roomController.startHandler(req));
 });
 
-router.get('/', async (req, res) => {
-    try {
-        const games = await Game.find();
-        res.json(games);
-    } catch(error) {
-        res.json({message:err});
-    }   
-})
+/**
+ * Request Body: user_id
+ */
+router.get('/:gameID/:user_id/checkInRoom', async (req, res) => {
+    res.send(await roomController.checkInRoomHandler(req));
+});
 
 module.exports = router;

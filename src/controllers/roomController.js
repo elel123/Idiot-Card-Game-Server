@@ -349,4 +349,29 @@ const startHandler = async function(req) {
 
 }
 
-module.exports = { joinHandler, createHandler, removePlayerHandler, leaveRoomHandler, startHandler };
+const checkInRoomHandler = async function(req) {
+    const resBody = {
+        found : false,
+        err_msg : ""
+    } 
+
+    //Attempt to find the game
+    const game = await Game.findOne({room_id : req.params.gameID});
+    if (game == null) {
+        resBody.err_msg = "Room does not exist!";
+        return resBody;
+    }
+
+    const user_id = req.body.user_id === undefined ? req.params.user_id : req.body.user_id;
+
+    //Check if the user exists in the game room
+    if (game.players.indexOf(user_id) == -1) {
+        resBody.err_msg = "You are not in this game room!";
+        return resBody;
+    }
+      
+    resBody.found = true;
+    return resBody;
+} 
+
+module.exports = { joinHandler, createHandler, removePlayerHandler, leaveRoomHandler, startHandler, checkInRoomHandler };

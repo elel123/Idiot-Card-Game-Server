@@ -2,8 +2,14 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/user.js');
 const {PLAYABLE} = require('../constants/constants');
+const { KEY } = require("./constants/envConstants.js");
 
-router.get('/user', async (req, res) => {
+router.get('/:key/user', async (req, res) => {
+    if (req.params.key !== KEY) {
+        return {
+            message: "access denied"
+        };
+    }
     try {
         const users = await User.find();
         res.json(users);
@@ -21,7 +27,13 @@ router.get('/user/:id', async (req, res) => {
     }
 });
 
-router.post('/user', async (req, res) => {
+router.post('/:key/user', async (req, res) => {
+    if (req.params.key !== KEY) {
+        return {
+            message: "access denied"
+        };
+    }
+
     const user = new User({
         username: req.body.username
     });
