@@ -695,7 +695,7 @@ const takeFromCenterHandler = async function(req) {
     }
 
     //Check if a 2 has been played
-    if (req.body.selected_cards[0] % 13 == 2) {
+    if (req.body.chosen_cards[0] % 13 == 2) {
         resBody.go_again = true;
     }
 
