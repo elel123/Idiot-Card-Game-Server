@@ -591,7 +591,9 @@ const playHiddenCardHandler = async function(req) {
 const takeFromCenterHandler = async function(req) {
     const resBody = {
         success : false,
-        err_msg : ""
+        err_msg : "",
+        is_burn: false,
+        go_again: false
     }
 
     let fromUntouched = false;
@@ -627,38 +629,83 @@ const takeFromCenterHandler = async function(req) {
         return resBody;
     }  
 
+    if (req.body.chosen_cards === undefined) {
+        resBody.err_msg = "You did not select any cards to leave in the center.";
+        return resBody;
+    }
+
+    //Check if the selected cards are all the same number
+    let firstCard = req.body.chosen_cards[0] % 13;
+    for (let card of req.body.chosen_cards) {
+        //Check if all the selected cards are the same
+        if (card % 13 !== firstCard) {
+            resBody.err_msg = "The selected cards aren't duplicates (not same number)";
+            return resBody;
+        }
+    }
+
     //Check if the chosen card exists in either the user's hand or the center
     const player = await User.findOne({_id : req.body.user_id});
     if (player == null) {
         resBody.err_msg = "Error: User not found in database.";
         return resBody;
     }
-    if (player.hand.indexOf(req.body.chosen_card) == -1 && 
-        game.played_pile.indexOf(req.body.chosen_card) == -1) {
+    let selectedUntouched = [];
+    let selectedOther = [];
+    for (let card of req.body.chosen_cards) {
 
-        if (player.untouched_hand.indexOf(req.body.chosen_card) != -1 && player.hand.length == 0) {
-            fromUntouched = true;
-        } else {
-            resBody.err_msg = "The selected card doesn't exist in your hand!";
-            return resBody;
-        }
+        if (player.hand.indexOf(card) == -1 && game.played_pile.indexOf(card) == -1) {
+
+            if (player.untouched_hand.indexOf(card) != -1 && player.hand.length == 0 && game.deck.length == 0) {
+                fromUntouched = true;
+                selectedUntouched.push(card);
+            } else {
+                resBody.err_msg = "The selected card(s) doesn't exist in your playable hand!";
+                return resBody;
+            }
         
+        } else {
+            selectedOther.push(card);
+        }       
     }
+
 
     //Add the cards to the players hand and remove the chosen card
     if (fromUntouched) {
-        player.untouched_hand = player.untouched_hand.map((card) => {return (card == req.body.chosen_card) ? -1 : card});
-        player.hand = [req.body.chosen_card, ...game.played_pile];
+        for (let untouched of selectedUntouched) {
+            player.untouched_hand = player.untouched_hand.map((card) => {return (card == untouched) ? -1 : card});
+        }
+        player.hand = [...selectedUntouched, ...game.played_pile];
     } else {
         player.hand = [...player.hand, ...game.played_pile];
     }
-    game.played_pile = [...player.hand.splice(player.hand.indexOf(req.body.chosen_card), 1)];
+    game.played_pile = [];
+    for (let card of [...selectedUntouched, ...selectedOther]) {
+        game.played_pile.push(...player.hand.splice(player.hand.indexOf(card), 1));
+    }
      
+    //Check for if there is a burn
+    if (Game.isBurn(game.played_pile)) {
+
+        resBody.is_burn = true;
+        resBody.go_again = true;
+        //Move the played pile into the discard pile.
+        game.discard = [...game.discard, ...game.played_pile];
+        game.played_pile = [];
+    }
+
+    //Check if a 2 has been played
+    if (req.body.selected_cards[0] % 13 == 2) {
+        resBody.go_again = true;
+    }
+
 
     //Update the turn to the next player
-    let playerIndex = game.players.indexOf(req.body.user_id);
-    playerIndex = (playerIndex + 1) == game.players.length ? 0 : (playerIndex + 1);
-    game.turn_at = game.players[playerIndex];    
+    if (!resBody.go_again) {
+        let playerIndex = game.players.indexOf(req.body.user_id);
+        playerIndex = (playerIndex + 1) == game.players.length ? 0 : (playerIndex + 1);
+        game.turn_at = game.players[playerIndex];    
+    }
 
     //Check if the player is fixing their failed hidden play
     if (player.failed_hidden_play) {
@@ -679,6 +726,7 @@ const takeFromCenterHandler = async function(req) {
             {room_id : req.params.gameID},
             {$set : {
                 played_pile : game.played_pile,
+                discard : game.discard,
                 turn_at : game.turn_at,
                 time_updated : Date.now()
             }}

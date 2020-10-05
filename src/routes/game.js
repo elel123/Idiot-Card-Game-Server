@@ -38,7 +38,7 @@ router.put('/:gameID/playHidden', async (req, res) => {
 });
 
 /**
- * Request Body: user_id, chosen_card 
+ * Request Body: user_id, chosen_cards ([Number]) 
  */
 router.put('/:gameID/takeFromCenter', async (req, res) => {
     res.send(await gameController.takeFromCenterHandler(req));
