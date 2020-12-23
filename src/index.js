@@ -9,6 +9,7 @@ const { DATABASE_URL, SERVER_PORT } = require("./constants/envConstants.js");
 const userRoutes = require('./routes/user.js');
 const roomRoutes = require('./routes/room.js');
 const gameRoutes = require('./routes/game.js');
+const { emit } = require('./models/user.js');
 
 
 //App setup
@@ -96,6 +97,10 @@ mongoose.connect(DATABASE_URL, { useNewUrlParser: true, useUnifiedTopology: true
 
         socket.on('send-message', ({game_id, username, message}) => {
             socket.to(game_id).emit('sent-message', {username : username, message : message});
+        });
+
+        socket.on('ping-user', ({game_id, username}) => {
+            socket.to(game_id).emit('user-pinged', {username : username});
         });
 
         socket.on('new-room', ({game_id, new_game_id}) => {
